@@ -1,5 +1,11 @@
 "use client";
 
+declare global {
+  interface Window {
+    dataLayer?: any[];
+  }
+}
+
 type Sneaker = {
   id: number;
   name: string;
@@ -14,12 +20,22 @@ import { sneakers } from "../data/sneakers";
 export default function Home() {
   const [cart, setCart] = useState<Sneaker[]>([]);
 
-
   const addToCart = (sneaker: Sneaker) => {
-  setCart([...cart, sneaker]);
-  alert(`Added ${sneaker.name} to cart!`);
-};
+    // Update cart state
+    setCart([...cart, sneaker]);
 
+    // Show alert
+    alert(`Added ${sneaker.name} to cart!`);
+
+    // Push event to GTM for Meta Pixel
+    if (window.dataLayer) {
+      window.dataLayer.push({
+        event: "buy_button_click",  // Must match your GTM trigger
+        sneaker_name: sneaker.name,
+        sneaker_price: sneaker.price,
+      });
+    }
+  };
 
   return (
     <main className="p-8">
@@ -33,13 +49,12 @@ export default function Home() {
       {/* Sneaker list */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {(sneakers as Sneaker[]).map((sneaker) => (
-  <SneakerCard
-    key={sneaker.id}
-    sneaker={sneaker}
-    onBuy={() => addToCart(sneaker)}
-  />
-))}
-
+          <SneakerCard
+            key={sneaker.id}
+            sneaker={sneaker}
+            onBuy={() => addToCart(sneaker)}
+          />
+        ))}
       </div>
     </main>
   );
