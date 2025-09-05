@@ -2,7 +2,11 @@
 
 declare global {
   interface Window {
-    dataLayer?: any[];
+    dataLayer?: Array<{
+      event: string;
+      sneaker_name?: string;
+      sneaker_price?: number;
+    }>;
   }
 }
 
@@ -21,16 +25,12 @@ export default function Home() {
   const [cart, setCart] = useState<Sneaker[]>([]);
 
   const addToCart = (sneaker: Sneaker) => {
-    // Update cart state
     setCart([...cart, sneaker]);
-
-    // Show alert
     alert(`Added ${sneaker.name} to cart!`);
 
-    // Push event to GTM for Meta Pixel
     if (window.dataLayer) {
       window.dataLayer.push({
-        event: "buy_button_click",  // Must match your GTM trigger
+        event: "buy_button_click",
         sneaker_name: sneaker.name,
         sneaker_price: sneaker.price,
       });
@@ -48,7 +48,7 @@ export default function Home() {
 
       {/* Sneaker list */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {(sneakers as Sneaker[]).map((sneaker) => (
+        {sneakers.map((sneaker) => (
           <SneakerCard
             key={sneaker.id}
             sneaker={sneaker}
